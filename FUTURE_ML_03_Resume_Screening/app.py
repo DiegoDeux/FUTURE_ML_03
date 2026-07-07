@@ -1,11 +1,3 @@
-"""
-app.py
-------
-IT Talent Screening Command Center — an operational Streamlit dashboard
-for the Future Interns Machine Learning Task 3 resume screening system.
-
-Run with:  streamlit run app.py
-"""
 import os
 import sys
 import json
@@ -24,9 +16,8 @@ from scoring import build_pair_features, composite_score  # noqa: E402
 
 ARTIFACTS = os.path.join(BASE_DIR, "artifacts")
 
-# ----------------------------------------------------------------------------
 # Page config + theme
-# ----------------------------------------------------------------------------
+
 st.set_page_config(
     page_title="IT Talent Screening Command Center",
     page_icon="\u25C8",
@@ -47,7 +38,7 @@ PALETTE = {
     "blue": "#4F8FE8",
 }
 
-st.markdown(f"""
+st.html(f"""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -190,7 +181,7 @@ hr {{ border-color: var(--border); }}
 div[data-testid="stMetricValue"] {{ color: var(--amber); }}
 footer {{visibility: hidden;}}
 </style>
-""", unsafe_allow_html=True)
+""")
 
 PLOTLY_TEMPLATE = go.layout.Template(
     layout=go.Layout(
@@ -205,9 +196,8 @@ PLOTLY_TEMPLATE = go.layout.Template(
 )
 
 
-# ----------------------------------------------------------------------------
 # Data loading
-# ----------------------------------------------------------------------------
+
 @st.cache_resource(show_spinner="Loading screening engine...")
 def load_artifacts():
     jobs = pd.read_pickle(os.path.join(ARTIFACTS, "jobs_processed.pkl"))
@@ -251,9 +241,7 @@ def screen_all(job_id, weights_key):
     return pd.DataFrame(rows).sort_values("Composite Score", ascending=False).reset_index(drop=True)
 
 
-# ----------------------------------------------------------------------------
 # Sidebar controls
-# ----------------------------------------------------------------------------
 with st.sidebar:
     st.markdown("### \u25C8 Screening Console")
     st.caption("Select a real job posting to screen the candidate pool against.")
@@ -297,15 +285,15 @@ with st.sidebar:
 # ----------------------------------------------------------------------------
 # Header
 # ----------------------------------------------------------------------------
-st.markdown(f"""
+st.html(f"""
 <div class="command-header">
     <div>
         <p class="command-title">IT TALENT SCREENING COMMAND CENTER</p>
-        <p class="command-sub">NLP-driven resume screening &amp; candidate ranking · Future Interns ML Task 3</p>
+        <p class="command-sub">NLP-driven resume screening &amp; candidate ranking</p>
     </div>
     <div class="status-pill">ENGINE ONLINE</div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # ----------------------------------------------------------------------------
 # Job detail panel
@@ -314,51 +302,44 @@ required_skills = sel_job["skills_list"]
 req_years_display = "not specified" if pd.isna(sel_job.get("req_years", np.nan)) else f"{int(sel_job['req_years'])}+ yrs"
 
 chips_html = "".join(f'<span class="chip required">{s}</span>' for s in required_skills)
-st.markdown(f"""
+st.html(f"""
 <div class="job-panel">
     <p class="eyebrow">Target Job Posting &middot; {sel_job['role_family']}</p>
     <p class="job-title">{sel_job['job_title']}</p>
     <p class="job-meta">{sel_job['organization']} &middot; {sel_job['location']} &middot; Experience required: {req_years_display}</p>
     <div style="margin-top:12px;">{chips_html}</div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
-# ----------------------------------------------------------------------------
 # Screen + rank
-# ----------------------------------------------------------------------------
 ranked = screen_all(sel_job["job_id"], weights_key)
 top_candidates = ranked.head(top_n)
 
-# ----------------------------------------------------------------------------
 # KPI row
-# ----------------------------------------------------------------------------
+
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown(f"""<div class="kpi-card"><div class="kpi-label">Candidates Screened</div>
-    <div class="kpi-value">{len(ranked)}</div><div class="kpi-sub">across all backgrounds</div></div>""",
-                unsafe_allow_html=True)
+    st.html(f"""<div class="kpi-card"><div class="kpi-label">Candidates Screened</div>
+    <div class="kpi-value">{len(ranked)}</div><div class="kpi-sub">across all backgrounds</div></div>""")
 with k2:
     top_row = ranked.iloc[0]
-    st.markdown(f"""<div class="kpi-card"><div class="kpi-label">Top Candidate</div>
+    st.html(f"""<div class="kpi-card"><div class="kpi-label">Top Candidate</div>
     <div class="kpi-value amber">{top_row['Composite Score']:.1f}</div>
-    <div class="kpi-sub">{top_row['Candidate']}</div></div>""", unsafe_allow_html=True)
+    <div class="kpi-sub">{top_row['Candidate']}</div></div>""")
 with k3:
     avg_ml = ranked["ML Fit %"].mean()
-    st.markdown(f"""<div class="kpi-card"><div class="kpi-label">Avg ML Fit Probability</div>
-    <div class="kpi-value teal">{avg_ml:.1f}%</div><div class="kpi-sub">model-learned signal</div></div>""",
-                unsafe_allow_html=True)
+    st.html(f"""<div class="kpi-card"><div class="kpi-label">Avg ML Fit Probability</div>
+    <div class="kpi-value teal">{avg_ml:.1f}%</div><div class="kpi-sub">model-learned signal</div></div>""")
 with k4:
     strong_pool = (ranked["Skill Coverage %"] >= 50).mean() * 100
-    st.markdown(f"""<div class="kpi-card"><div class="kpi-label">Pool Meeting &ge;50% Skill Match</div>
-    <div class="kpi-value">{strong_pool:.0f}%</div><div class="kpi-sub">of screened candidates</div></div>""",
-                unsafe_allow_html=True)
+    st.html(f"""<div class="kpi-card"><div class="kpi-label">Pool Meeting &ge;50% Skill Match</div>
+    <div class="kpi-value">{strong_pool:.0f}%</div><div class="kpi-sub">of screened candidates</div></div>""")
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.html("<br>")
 
-# ----------------------------------------------------------------------------
+
 # Ranked table
-# ----------------------------------------------------------------------------
-st.markdown('<p class="eyebrow">Ranked Candidates</p>', unsafe_allow_html=True)
+st.html('<p class="eyebrow">Ranked Candidates</p>')
 display_cols = ["Candidate", "Background", "Seniority", "Experience (yrs)", "Composite Score",
                  "ML Fit %", "Skill Coverage %", "N Matched", "N Missing"]
 st.dataframe(
@@ -372,7 +353,7 @@ st.dataframe(
     },
 )
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.html("<br>")
 
 # ----------------------------------------------------------------------------
 # Two-column: skill gap chart + candidate drilldown
@@ -380,7 +361,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 col_left, col_right = st.columns([1, 1.2], gap="large")
 
 with col_left:
-    st.markdown('<p class="eyebrow">Skill Gap Across Candidate Pool</p>', unsafe_allow_html=True)
+    st.html('<p class="eyebrow">Skill Gap Across Candidate Pool</p>')
     all_missing = [s for missing_list in ranked["Missing"] for s in missing_list]
     if all_missing:
         gap_counts = pd.Series(all_missing).value_counts().sort_values(ascending=True).tail(10)
@@ -394,8 +375,7 @@ with col_left:
     else:
         st.info("No skill gaps detected across the screened pool for this posting.")
 
-    st.markdown('<p class="eyebrow" style="margin-top:8px;">Candidate Backgrounds in Top Results</p>',
-                unsafe_allow_html=True)
+    st.html('<p class="eyebrow" style="margin-top:8px;">Candidate Backgrounds in Top Results</p>')
     bg_counts = top_candidates["Background"].value_counts()
     fig_bg = go.Figure(go.Pie(labels=bg_counts.index, values=bg_counts.values, hole=0.55,
                                marker=dict(colors=px.colors.sequential.Sunset)))
@@ -404,7 +384,7 @@ with col_left:
     st.plotly_chart(fig_bg, width='stretch')
 
 with col_right:
-    st.markdown('<p class="eyebrow">Candidate Drilldown</p>', unsafe_allow_html=True)
+    st.html('<p class="eyebrow">Candidate Drilldown</p>')
     cand_options = [f"#{i+1}  ·  {row['Candidate']}  ({row['Composite Score']:.1f})"
                     for i, row in top_candidates.reset_index(drop=True).iterrows()]
     sel_cand_label = st.selectbox("Select candidate", cand_options, label_visibility="collapsed")
@@ -432,12 +412,9 @@ with col_right:
 
     chip_html = "".join(f'<span class="chip matched">\u2713 {s}</span>' for s in matched)
     chip_html += "".join(f'<span class="chip missing">\u2715 {s}</span>' for s in missing)
-    st.markdown(f'<div class="panel-box">{chip_html or "No skill data available."}</div>',
-                unsafe_allow_html=True)
+    st.html(f'<div class="panel-box">{chip_html or "No skill data available."}</div>')
 
     with st.expander("View resume text"):
         st.write(cand["resume_text"])
 
-st.markdown("<br>", unsafe_allow_html=True)
-st.caption("Built for Future Interns Machine Learning Task 3 · Job postings sourced from the real "
-           "Monster.com jobs dataset · Candidate pool is simulated per the task's own data guidance.")
+st.html("<br>")
